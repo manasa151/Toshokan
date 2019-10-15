@@ -6,12 +6,13 @@ from watchdog.events import LoggingEventHandler
 import time
 import datetime
 from watchdog.events import PatternMatchingEventHandler
-
+#  “\AppData\Local\Google\Chrome\User Data\Default\Cache.”
 file_to_watch = 'request_species.csv'
-directory_to_watch = ''
+
+when_script_started = time.time()
 
 if __name__ == '__main__':
-    path = 'C:\\Users\\jmentore\\Downloads'
+    directory_to_watch = 'C:\\Users\\jmentore\\AppData\\Local\\Google\\Chrome\\User Data\\Default\\Cache'
     patterns = '*'
     ignore_patterns = ''
     ignore_directories = False
@@ -21,14 +22,19 @@ if __name__ == '__main__':
 
 
 def on_created(event):
-    file_created = time.ctime(os.path.getctime(event.src_path))
-    when_script_started = time.ctime()
+
+    file_created = os.path.getctime(event.src_path)
+    #formatted_time = time.time(file_created)
 
     print(f"hey, {event.src_path} has been created!")
-    print("Created on: %s" % file_created)
+    print(f"file created:{file_created} ago!")
+    print(f"This Script started, {when_script_started} ago!")
+    print(f'Elapse time: {when_script_started-file_created}')
 
-    if file_created > when_script_started:
-        os.remove(os.path.join(path, event.src_path))
+    if (file_created > when_script_started):
+        os.remove(os.path.join(directory_to_watch, event.src_path))
+        print(f"Jelton, {event.src_path} has been deleted!")
+
     else:
         print('No file was deleted')
 
@@ -36,7 +42,8 @@ def on_created(event):
 my_event_handler.on_created = on_created
 go_recursively = False
 my_observer = Observer()
-my_observer.schedule(my_event_handler, path, recursive=go_recursively)
+my_observer.schedule(my_event_handler, directory_to_watch,
+                     recursive=go_recursively)
 my_observer.start()
 
 try:
